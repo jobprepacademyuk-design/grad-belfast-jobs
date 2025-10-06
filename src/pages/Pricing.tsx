@@ -34,7 +34,7 @@ const Pricing = () => {
               <Card className="overflow-hidden border-2 border-accent/20">
                 <div className="bg-gradient-to-br from-accent/10 to-accent/5 p-8 text-center">
                   <h2 className="text-3xl font-bold text-primary mb-2">
-                    Premium Alerts Plan
+                    Premium GradBelfast Plan
                   </h2>
                   <div className="flex items-baseline justify-center gap-2 mb-4">
                     <span className="text-5xl font-bold text-primary">£10.99</span>
