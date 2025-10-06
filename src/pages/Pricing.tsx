@@ -23,7 +23,7 @@ const Pricing = () => {
                 Premium Feature
               </div>
               <h1 className="mb-4 text-4xl font-bold text-primary md:text-5xl">
-                Premium Job Alerts
+                Subscribe Now
               </h1>
               <p className="text-lg text-muted-foreground">
                 Be the first to know about new graduate opportunities in Belfast
