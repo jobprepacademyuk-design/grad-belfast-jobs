@@ -54,19 +54,7 @@ const Pricing = () => {
                       <div>
                         <p className="font-medium text-primary">Daily Email Alerts</p>
                         <p className="text-sm text-muted-foreground">
-                          Receive new jobs every morning at 7:30am
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-full bg-accent/10 p-1 mt-0.5">
-                        <Check className="h-4 w-4 text-accent" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-primary">Sector Filtering</p>
-                        <p className="text-sm text-muted-foreground">
-                          Get alerts for your preferred sectors only
+                          Receive new jobs every day @5:30pm
                         </p>
                       </div>
                     </div>
@@ -78,7 +66,7 @@ const Pricing = () => {
                       <div>
                         <p className="font-medium text-primary">Early Access</p>
                         <p className="text-sm text-muted-foreground">
-                          Be among the first to apply to new openings
+                          Be the first to apply to new openings
                         </p>
                       </div>
                     </div>
@@ -88,9 +76,21 @@ const Pricing = () => {
                         <Check className="h-4 w-4 text-accent" />
                       </div>
                       <div>
-                        <p className="font-medium text-primary">Weekly Summary</p>
+                        <p className="font-medium text-primary">Updated Daily</p>
                         <p className="text-sm text-muted-foreground">
-                          Optional weekly digest of all opportunities
+                          Our teams constant monitoring means you will never miss an oppurtunity
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-full bg-accent/10 p-1 mt-0.5">
+                        <Check className="h-4 w-4 text-accent" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-primary">Application Tips</p>
+                        <p className="text-sm text-muted-foreground">
+                          You will receive application advice when our team posts
                         </p>
                       </div>
                     </div>
