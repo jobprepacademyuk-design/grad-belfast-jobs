@@ -23,7 +23,7 @@ type Job = {
   Notes: string;
 };
 
-/** Minimal CSV parser that respects quotes and commas in fields */
+/** Minimal CSV parser that respects quotes and commas */
 function parseCSV(text: string): Job[] {
   const rows: string[][] = [];
   let row: string[] = [];
@@ -35,45 +35,24 @@ function parseCSV(text: string): Job[] {
     const next = text[i + 1];
 
     if (inQuotes) {
-      if (ch === '"' && next === '"') {
-        cell += '"'; // escaped quote
-        i++;
-      } else if (ch === '"') {
-        inQuotes = false;
-      } else {
-        cell += ch;
-      }
+      if (ch === '"' && next === '"') { cell += '"'; i++; }
+      else if (ch === '"') { inQuotes = false; }
+      else { cell += ch; }
     } else {
-      if (ch === '"') {
-        inQuotes = true;
-      } else if (ch === ",") {
-        row.push(cell);
-        cell = "";
-      } else if (ch === "\n") {
-        row.push(cell);
-        rows.push(row);
-        row = [];
-        cell = "";
-      } else if (ch === "\r") {
-        // ignore \r (CRLF)
-      } else {
-        cell += ch;
-      }
+      if (ch === '"') inQuotes = true;
+      else if (ch === ",") { row.push(cell); cell = ""; }
+      else if (ch === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
+      else if (ch !== "\r") { cell += ch; }
     }
   }
-  // push last cell/row if file doesn't end with newline
-  if (cell.length || row.length) {
-    row.push(cell);
-    rows.push(row);
-  }
+  if (cell.length || row.length) { row.push(cell); rows.push(row); }
 
   if (!rows.length) return [];
-  const header = rows[0].map((h) => h.trim());
-  const dataRows = rows.slice(1).filter((r) => r.some((c) => c && c.trim().length));
-
-  return dataRows.map((r) => {
+  const header = rows[0].map(h => h.trim());
+  const data = rows.slice(1).filter(r => r.some(c => (c || "").trim().length));
+  return data.map(r => {
     const obj: any = {};
-    header.forEach((h, i) => (obj[h] = (r[i] ?? "").trim()));
+    header.forEach((h, i) => obj[h] = (r[i] ?? "").trim());
     return obj as Job;
   });
 }
@@ -90,7 +69,8 @@ const JobListings = () => {
         setLoading(true);
         setError(null);
 
-        const csvUrl = import.meta.env.VITE_AIRTABLE_ALL_CSV || "/jobs.csv";
+        const csvUrl =
+          import.meta.env.VITE_JOBS_CSV || "/jobs.csv"; // fallback to local
         const res = await fetch(csvUrl, { cache: "no-cache" });
         if (!res.ok) throw new Error(`Failed to load jobs (${res.status})`);
 
