@@ -14,24 +14,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+type RawRow = Record<string, string>;
 type Job = {
-  Company: string;
-  "Job Title": string;
-  Category: string;
-  Salary: string;
-  "Job Link": string;
-  Notes: string;
+  company: string;
+  title: string;
+  category: string;
+  salary: string;
+  link: string;
+  notes: string;
 };
 
-// ✅ Hardcoded CSV URL (no .env needed)
 const CSV_URL =
   "https://raw.githubusercontent.com/jobprepacademyuk-design/grad-belfast-jobs/main/public/jobs.csv";
 
-/** Robust CSV parser that respects quotes, commas, and CRLF */
-function parseCSV(text: string): Job[] {
-  // Remove BOM if present
-  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
-
+/** Robust CSV parser that respects quotes/commas/CRLF, returns rows keyed by original headers */
+function parseCSV(text: string): RawRow[] {
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1); // strip BOM
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = "";
@@ -43,8 +41,7 @@ function parseCSV(text: string): Job[] {
 
     if (inQuotes) {
       if (ch === '"' && next === '"') {
-        cell += '"'; // escaped quote
-        i++;
+        cell += '"'; i++;
       } else if (ch === '"') {
         inQuotes = false;
       } else {
@@ -54,35 +51,46 @@ function parseCSV(text: string): Job[] {
       if (ch === '"') {
         inQuotes = true;
       } else if (ch === ",") {
-        row.push(cell);
-        cell = "";
+        row.push(cell); cell = "";
       } else if (ch === "\n") {
-        row.push(cell);
-        rows.push(row);
-        row = [];
-        cell = "";
-      } else if (ch === "\r") {
-        // ignore \r (handle CRLF)
-      } else {
+        row.push(cell); rows.push(row); row = []; cell = "";
+      } else if (ch !== "\r") {
         cell += ch;
       }
     }
   }
-  // push last cell/row if file doesn't end with newline
-  if (cell.length || row.length) {
-    row.push(cell);
-    rows.push(row);
-  }
+  if (cell.length || row.length) { row.push(cell); rows.push(row); }
 
   if (!rows.length) return [];
   const header = rows[0].map((h) => h.trim());
   const dataRows = rows.slice(1).filter((r) => r.some((c) => (c ?? "").trim().length));
 
   return dataRows.map((r) => {
-    const obj: any = {};
+    const obj: RawRow = {};
     header.forEach((h, i) => (obj[h] = (r[i] ?? "").trim()));
-    return obj as Job;
+    return obj;
   });
+}
+
+/** Normalize header names to a canonical key (lowercase, no spaces/punctuation) */
+function normHeader(h: string) {
+  return h.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/** Find the best matching header name among several options */
+function findHeader(headers: string[], candidates: string[]): string | null {
+  const normalized = headers.map((h) => ({ orig: h, norm: normHeader(h) }));
+  const candidateNorms = candidates.map(normHeader);
+  for (const c of candidateNorms) {
+    const hit = normalized.find((h) => h.norm === c);
+    if (hit) return hit.orig;
+  }
+  // fallback: partial contains (e.g., "categorytype" contains "category")
+  for (const c of candidateNorms) {
+    const hit = normalized.find((h) => h.norm.includes(c));
+    if (hit) return hit.orig;
+  }
+  return null;
 }
 
 export default function JobListings() {
@@ -97,20 +105,50 @@ export default function JobListings() {
         setLoading(true);
         setError(null);
 
-        console.log("Fetching jobs CSV from:", CSV_URL);
         const res = await fetch(CSV_URL, { cache: "no-cache" });
         if (!res.ok) throw new Error(`Failed to load jobs (${res.status})`);
-
         const text = await res.text();
-        const parsed = parseCSV(text);
+        const raw = parseCSV(text);
+
+        if (raw.length === 0) {
+          setJobs([]); setLoading(false);
+          console.warn("CSV parsed but contains no data rows.");
+          return;
+        }
+
+        const headers = Object.keys(raw[0]);
+
+        // Detect actual column names from whatever the CSV has
+        const companyH = findHeader(headers, ["Company", "Employer", "Organisation"]) || "Company";
+        const titleH   = findHeader(headers, ["Job Title", "Title", "Role"]) || "Job Title";
+        const catH     = findHeader(headers, ["Category", "Sector", "Discipline"]) || "Category";
+        const salaryH  = findHeader(headers, ["Salary", "Pay", "Compensation"]) || "Salary";
+        const linkH    = findHeader(headers, ["Job Link", "Link", "URL"]) || "Job Link";
+        const notesH   = findHeader(headers, ["Notes", "Remarks", "Description"]) || "Notes";
+
+        // Map rows to our Job shape
+        const mapped: Job[] = raw.map((r) => ({
+          company: (r[companyH] || "").trim(),
+          title: (r[titleH] || "").trim(),
+          category: (r[catH] || "").trim(),
+          salary: (r[salaryH] || "").trim(),
+          link: (r[linkH] || "").trim(),
+          notes: (r[notesH] || "").trim(),
+        }));
+
+        // DEBUG: show what categories we actually parsed
+        const foundCats = Array.from(new Set(mapped.map(m => m.category.toLowerCase().trim()))).sort();
+        console.log("Parsed headers:", headers);
+        console.log("Detected columns:", { companyH, titleH, catH, salaryH, linkH, notesH });
+        console.log("Categories found in CSV:", foundCats);
+        console.log("Route category:", (category || "").toLowerCase().trim());
 
         const filtered = category
-          ? parsed.filter(
+          ? mapped.filter(
               (j) =>
-                (j.Category || "").toLowerCase().trim() ===
-                (category || "").toLowerCase().trim()
+                j.category.toLowerCase().trim() === (category || "").toLowerCase().trim()
             )
-          : parsed;
+          : mapped;
 
         setJobs(filtered);
       } catch (e: any) {
@@ -177,13 +215,13 @@ export default function JobListings() {
                     <TableBody>
                       {jobs.map((job, index) => (
                         <TableRow key={index} className="hover:bg-secondary/30">
-                          <TableCell className="font-medium">{job.Company}</TableCell>
-                          <TableCell>{job["Job Title"]}</TableCell>
-                          <TableCell>{job.Category}</TableCell>
-                          <TableCell className="whitespace-nowrap">{job.Salary}</TableCell>
+                          <TableCell className="font-medium">{job.company}</TableCell>
+                          <TableCell>{job.title}</TableCell>
+                          <TableCell>{job.category}</TableCell>
+                          <TableCell className="whitespace-nowrap">{job.salary}</TableCell>
                           <TableCell className="text-center">
                             <a
-                              href={job["Job Link"]}
+                              href={job.link}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors break-all"
@@ -192,8 +230,8 @@ export default function JobListings() {
                               <ExternalLink className="h-4 w-4" />
                             </a>
                           </TableCell>
-                          <TableCell className="max-w-xs truncate" title={job.Notes}>
-                            {job.Notes}
+                          <TableCell className="max-w-xs truncate" title={job.notes}>
+                            {job.notes}
                           </TableCell>
                         </TableRow>
                       ))}
