@@ -6,30 +6,26 @@ import { ExternalLink, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 
-type RawRow = Record<string, string>;
 type Job = {
-  company: string;
-  title: string;
-  category: string;
-  salary: string;
-  link: string;
-  notes: string;
+  Company: string;
+  "Job Title": string;
+  Category: string;
+  Salary: string;
+  "Job Link": string;
+  Notes: string;
 };
 
-const CSV_URL =
-  "https://raw.githubusercontent.com/jobprepacademyuk-design/grad-belfast-jobs/main/public/jobs.csv";
+// Always read from the local public/ folder
+const CSV_URL = "/jobs.csv";
 
-/** Robust CSV parser that respects quotes/commas/CRLF, returns rows keyed by original headers */
-function parseCSV(text: string): RawRow[] {
+/** CSV parser (handles quotes, commas, CRLF) */
+function parseCSV(text: string): Job[] {
+  if (!text) return [];
   if (text.charCodeAt(0) === 0xfeff) text = text.slice(1); // strip BOM
+
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = "";
@@ -40,57 +36,30 @@ function parseCSV(text: string): RawRow[] {
     const next = text[i + 1];
 
     if (inQuotes) {
-      if (ch === '"' && next === '"') {
-        cell += '"'; i++;
-      } else if (ch === '"') {
-        inQuotes = false;
-      } else {
-        cell += ch;
-      }
+      if (ch === '"' && next === '"') { cell += '"'; i++; }
+      else if (ch === '"') { inQuotes = false; }
+      else { cell += ch; }
     } else {
-      if (ch === '"') {
-        inQuotes = true;
-      } else if (ch === ",") {
-        row.push(cell); cell = "";
-      } else if (ch === "\n") {
-        row.push(cell); rows.push(row); row = []; cell = "";
-      } else if (ch !== "\r") {
-        cell += ch;
-      }
+      if (ch === '"') inQuotes = true;
+      else if (ch === ",") { row.push(cell); cell = ""; }
+      else if (ch === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
+      else if (ch === "\r") { /* ignore CR */ }
+      else { cell += ch; }
     }
   }
   if (cell.length || row.length) { row.push(cell); rows.push(row); }
 
   if (!rows.length) return [];
-  const header = rows[0].map((h) => h.trim());
-  const dataRows = rows.slice(1).filter((r) => r.some((c) => (c ?? "").trim().length));
+  const header = rows[0].map(h => h.trim());
+  const dataRows = rows.slice(1).filter(r => r.some(c => (c ?? "").trim().length));
+  console.log("CSV header:", header);
+  console.log("CSV data row count:", dataRows.length);
 
   return dataRows.map((r) => {
-    const obj: RawRow = {};
+    const obj: any = {};
     header.forEach((h, i) => (obj[h] = (r[i] ?? "").trim()));
-    return obj;
+    return obj as Job;
   });
-}
-
-/** Normalize header names to a canonical key (lowercase, no spaces/punctuation) */
-function normHeader(h: string) {
-  return h.toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-/** Find the best matching header name among several options */
-function findHeader(headers: string[], candidates: string[]): string | null {
-  const normalized = headers.map((h) => ({ orig: h, norm: normHeader(h) }));
-  const candidateNorms = candidates.map(normHeader);
-  for (const c of candidateNorms) {
-    const hit = normalized.find((h) => h.norm === c);
-    if (hit) return hit.orig;
-  }
-  // fallback: partial contains (e.g., "categorytype" contains "category")
-  for (const c of candidateNorms) {
-    const hit = normalized.find((h) => h.norm.includes(c));
-    if (hit) return hit.orig;
-  }
-  return null;
 }
 
 export default function JobListings() {
@@ -105,50 +74,21 @@ export default function JobListings() {
         setLoading(true);
         setError(null);
 
+        console.log("Fetching local CSV from:", CSV_URL);
         const res = await fetch(CSV_URL, { cache: "no-cache" });
         if (!res.ok) throw new Error(`Failed to load jobs (${res.status})`);
+
         const text = await res.text();
-        const raw = parseCSV(text);
-
-        if (raw.length === 0) {
-          setJobs([]); setLoading(false);
-          console.warn("CSV parsed but contains no data rows.");
-          return;
-        }
-
-        const headers = Object.keys(raw[0]);
-
-        // Detect actual column names from whatever the CSV has
-        const companyH = findHeader(headers, ["Company", "Employer", "Organisation"]) || "Company";
-        const titleH   = findHeader(headers, ["Job Title", "Title", "Role"]) || "Job Title";
-        const catH     = findHeader(headers, ["Category", "Sector", "Discipline"]) || "Category";
-        const salaryH  = findHeader(headers, ["Salary", "Pay", "Compensation"]) || "Salary";
-        const linkH    = findHeader(headers, ["Job Link", "Link", "URL"]) || "Job Link";
-        const notesH   = findHeader(headers, ["Notes", "Remarks", "Description"]) || "Notes";
-
-        // Map rows to our Job shape
-        const mapped: Job[] = raw.map((r) => ({
-          company: (r[companyH] || "").trim(),
-          title: (r[titleH] || "").trim(),
-          category: (r[catH] || "").trim(),
-          salary: (r[salaryH] || "").trim(),
-          link: (r[linkH] || "").trim(),
-          notes: (r[notesH] || "").trim(),
-        }));
-
-        // DEBUG: show what categories we actually parsed
-        const foundCats = Array.from(new Set(mapped.map(m => m.category.toLowerCase().trim()))).sort();
-        console.log("Parsed headers:", headers);
-        console.log("Detected columns:", { companyH, titleH, catH, salaryH, linkH, notesH });
-        console.log("Categories found in CSV:", foundCats);
-        console.log("Route category:", (category || "").toLowerCase().trim());
+        console.log("CSV first 200 chars:", text.slice(0, 200).replace(/\n/g, "\\n"));
+        const parsed = parseCSV(text);
 
         const filtered = category
-          ? mapped.filter(
+          ? parsed.filter(
               (j) =>
-                j.category.toLowerCase().trim() === (category || "").toLowerCase().trim()
+                (j.Category || "").toLowerCase().trim() ===
+                (category || "").toLowerCase().trim()
             )
-          : mapped;
+          : parsed;
 
         setJobs(filtered);
       } catch (e: any) {
@@ -160,14 +100,11 @@ export default function JobListings() {
     })();
   }, [category]);
 
-  const categoryTitle = category
-    ? category.charAt(0).toUpperCase() + category.slice(1)
-    : "All";
+  const categoryTitle = category ? category.charAt(0).toUpperCase() + category.slice(1) : "All";
 
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-
       <main className="flex-1">
         <section className="py-12 md:py-16">
           <div className="container px-4 md:px-6">
@@ -187,17 +124,11 @@ export default function JobListings() {
             </div>
 
             {loading ? (
-              <Card className="p-12 text-center">
-                <p className="text-muted-foreground">Loading jobs...</p>
-              </Card>
+              <Card className="p-12 text-center"><p className="text-muted-foreground">Loading jobs...</p></Card>
             ) : error ? (
-              <Card className="p-12 text-center">
-                <p className="text-red-500">{error}</p>
-              </Card>
+              <Card className="p-12 text-center"><p className="text-red-500">{error}</p></Card>
             ) : jobs.length === 0 ? (
-              <Card className="p-12 text-center">
-                <p className="text-muted-foreground">No jobs found in this category.</p>
-              </Card>
+              <Card className="p-12 text-center"><p className="text-muted-foreground">No jobs found in this category.</p></Card>
             ) : (
               <Card className="overflow-hidden">
                 <div className="overflow-x-auto">
@@ -213,25 +144,24 @@ export default function JobListings() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {jobs.map((job, index) => (
-                        <TableRow key={index} className="hover:bg-secondary/30">
-                          <TableCell className="font-medium">{job.company}</TableCell>
-                          <TableCell>{job.title}</TableCell>
-                          <TableCell>{job.category}</TableCell>
-                          <TableCell className="whitespace-nowrap">{job.salary}</TableCell>
+                      {jobs.map((job, i) => (
+                        <TableRow key={i} className="hover:bg-secondary/30">
+                          <TableCell className="font-medium">{job.Company}</TableCell>
+                          <TableCell>{job["Job Title"]}</TableCell>
+                          <TableCell>{job.Category}</TableCell>
+                          <TableCell className="whitespace-nowrap">{job.Salary}</TableCell>
                           <TableCell className="text-center">
                             <a
-                              href={job.link}
+                              href={job["Job Link"]}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors break-all"
                             >
-                              Apply
-                              <ExternalLink className="h-4 w-4" />
+                              Apply <ExternalLink className="h-4 w-4" />
                             </a>
                           </TableCell>
-                          <TableCell className="max-w-xs truncate" title={job.notes}>
-                            {job.notes}
+                          <TableCell className="max-w-xs truncate" title={job.Notes}>
+                            {job.Notes}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -243,7 +173,6 @@ export default function JobListings() {
           </div>
         </section>
       </main>
-
       <Footer />
     </div>
   );
