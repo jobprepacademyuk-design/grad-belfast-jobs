@@ -1,21 +1,21 @@
-Company,Job Title,Salary,Location,Job Link,Opening Date,Closing Date,Notes,Category
-Deloitte,Graduate Financial Analyst,£28000-£32000,Belfast,https://example.com/job1,2025-01-15,2025-03-15,STEM background preferred,Finance
-PwC,Audit Graduate,£26000-£30000,Belfast,https://example.com/job2,2025-01-20,2025-03-20,ACA qualification provided,Finance
-KPMG,Tax Advisory Graduate,£27000-£31000,Belfast,https://example.com/job3,2025-02-01,2025-04-01,Excellent benefits package,Finance
-Ernst & Young,Financial Services Graduate,£29000-£33000,Belfast,https://example.com/job4,2025-01-10,2025-03-10,Rotational programme,Finance
-Bank of Ireland,Graduate Banking Analyst,£25000-£29000,Belfast,https://example.com/job5,2025-02-15,2025-04-15,Fast-track career path,Finance
-Allen & Overy,Graduate Solicitor,£32000-£38000,Belfast,https://example.com/job6,2025-01-25,2025-03-25,Training contract included,Law
-Pinsent Masons,Trainee Solicitor,£30000-£36000,Belfast,https://example.com/job7,2025-02-05,2025-04-05,Competitive benefits,Law
-Herbert Smith Freehills,Legal Graduate,£31000-£37000,Belfast,https://example.com/job8,2025-01-18,2025-03-18,International opportunities,Law
-Clifford Chance,Graduate Lawyer,£33000-£39000,Belfast,https://example.com/job9,2025-02-10,2025-04-10,Leading global firm,Law
-Carson McDowell,Trainee Solicitor,£28000-£34000,Belfast,https://example.com/job10,2025-01-22,2025-03-22,Local firm with strong reputation,Law
-Bombardier Aerospace,Graduate Mechanical Engineer,£30000-£35000,Belfast,https://example.com/job11,2025-01-12,2025-03-12,Work on cutting-edge aircraft,Engineering
-Caterpillar,Graduate Design Engineer,£28000-£33000,Belfast,https://example.com/job12,2025-02-08,2025-04-08,Heavy machinery innovation,Engineering
-Fujitsu,Graduate Systems Engineer,£27000-£32000,Belfast,https://example.com/job13,2025-01-28,2025-03-28,Global technology leader,Engineering
-Spirit AeroSystems,Graduate Aerospace Engineer,£29000-£34000,Belfast,https://example.com/job14,2025-02-12,2025-04-12,Exciting aerospace projects,Engineering
-BAE Systems,Graduate Electrical Engineer,£31000-£36000,Belfast,https://example.com/job15,2025-01-16,2025-03-16,Defence & security sector,Engineering
-Kainos,Graduate Software Engineer,£28000-£33000,Belfast,https://example.com/job16,2025-01-14,2025-03-14,Agile development environment,Tech
-Liberty IT,Graduate Developer,£26000-£31000,Belfast,https://example.com/job17,2025-02-03,2025-04-03,Financial services technology,Tech
-Allstate NI,Graduate Software Developer,£29000-£34000,Belfast,https://example.com/job18,2025-01-21,2025-03-21,Insurance technology innovation,Tech
-Citi,Technology Graduate,£30000-£35000,Belfast,https://example.com/job19,2025-02-14,2025-04-14,Global banking technology,Tech
-Rapid7,Graduate Security Engineer,£31000-£36000,Belfast,https://example.com/job20,2025-01-19,2025-03-19,Cybersecurity focus,Tech
+Company,Job Title,Category,Salary,Job Link,Notes
+Deloitte,Graduate Financial Analyst,Finance,£28000-£32000,https://example.com/job1,STEM background preferred
+PwC,Audit Graduate,Finance,£26000-£30000,https://example.com/job2,ACA qualification provided
+KPMG,Tax Advisory Graduate,Finance,£27000-£31000,https://example.com/job3,Excellent benefits package
+Ernst & Young,Financial Services Graduate,Finance,£29000-£33000,https://example.com/job4,Rotational programme
+Bank of Ireland,Graduate Banking Analyst,Finance,£25000-£29000,https://example.com/job5,Fast-track career path
+Allen & Overy,Graduate Solicitor,Law,£32000-£38000,https://example.com/job6,Training contract included
+Pinsent Masons,Trainee Solicitor,Law,£30000-£36000,https://example.com/job7,Competitive benefits
+Herbert Smith Freehills,Legal Graduate,Law,£31000-£37000,https://example.com/job8,International opportunities
+Clifford Chance,Graduate Lawyer,Law,£33000-£39000,https://example.com/job9,Leading global firm
+Carson McDowell,Trainee Solicitor,Law,£28000-£34000,https://example.com/job10,Local firm with strong reputation
+Bombardier Aerospace,Graduate Mechanical Engineer,Engineering,£30000-£35000,https://example.com/job11,Work on cutting-edge aircraft
+Caterpillar,Graduate Design Engineer,Engineering,£28000-£33000,https://example.com/job12,Heavy machinery innovation
+Fujitsu,Graduate Systems Engineer,Engineering,£27000-£32000,https://example.com/job13,Global technology leader
+Spirit AeroSystems,Graduate Aerospace Engineer,Engineering,£29000-£34000,https://example.com/job14,Exciting aerospace projects
+BAE Systems,Graduate Electrical Engineer,Engineering,£31000-£36000,https://example.com/job15,Defence & security sector
+Kainos,Graduate Software Engineer,Tech,£28000-£33000,https://example.com/job16,Agile development environment
+Liberty IT,Graduate Developer,Tech,£26000-£31000,https://example.com/job17,Financial services technology
+Allstate NI,Graduate Software Developer,Tech,£29000-£34000,https://example.com/job18,Insurance technology innovation
+Citi,Technology Graduate,Tech,£30000-£35000,https://example.com/job19,Global banking technology
+Rapid7,Graduate Security Engineer,Tech,£31000-£36000,https://example.com/job20,Cybersecurity focus
