@@ -23,6 +23,61 @@ type Job = {
   Notes: string;
 };
 
+/** Minimal CSV parser that respects quotes and commas in fields */
+function parseCSV(text: string): Job[] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
+
+    if (inQuotes) {
+      if (ch === '"' && next === '"') {
+        cell += '"'; // escaped quote
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        cell += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ",") {
+        row.push(cell);
+        cell = "";
+      } else if (ch === "\n") {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = "";
+      } else if (ch === "\r") {
+        // ignore \r (CRLF)
+      } else {
+        cell += ch;
+      }
+    }
+  }
+  // push last cell/row if file doesn't end with newline
+  if (cell.length || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+
+  if (!rows.length) return [];
+  const header = rows[0].map((h) => h.trim());
+  const dataRows = rows.slice(1).filter((r) => r.some((c) => c && c.trim().length));
+
+  return dataRows.map((r) => {
+    const obj: any = {};
+    header.forEach((h, i) => (obj[h] = (r[i] ?? "").trim()));
+    return obj as Job;
+  });
+}
+
 const JobListings = () => {
   const { category } = useParams<{ category: string }>();
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -30,58 +85,33 @@ const JobListings = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadJobs = async () => {
+    (async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // --- OPTION 1: One Airtable CSV for all jobs ---
-        const masterCsv = import.meta.env.VITE_AIRTABLE_ALL_CSV;
-
-        // --- OPTION 2: Separate CSVs per category (preferred if you made filtered views) ---
-        const urls: Record<string, string> = {
-          finance: import.meta.env.VITE_AIRTABLE_FINANCE_CSV,
-          law: import.meta.env.VITE_AIRTABLE_LAW_CSV,
-          engineering: import.meta.env.VITE_AIRTABLE_ENGINEERING_CSV,
-          tech: import.meta.env.VITE_AIRTABLE_TECH_CSV,
-        };
-
-        const fetchUrl =
-          (category && urls[category.toLowerCase()]) ||
-          masterCsv ||
-          "/jobs.csv"; // fallback to local CSV
-
-        const res = await fetch(fetchUrl, { cache: "no-cache" });
+        const csvUrl = import.meta.env.VITE_AIRTABLE_ALL_CSV || "/jobs.csv";
+        const res = await fetch(csvUrl, { cache: "no-cache" });
         if (!res.ok) throw new Error(`Failed to load jobs (${res.status})`);
 
         const text = await res.text();
-        const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-        const headers = lines[0].split(",").map((h) => h.trim());
-        const rows: Job[] = lines.slice(1).map((line) => {
-          const cols = line.split(",").map((c) => c.trim());
-          const obj: any = {};
-          headers.forEach((h, i) => (obj[h] = cols[i] ?? ""));
-          return obj as Job;
-        });
+        const parsed = parseCSV(text);
 
-        // Filter if using single master CSV
         const filtered = category
-          ? rows.filter(
+          ? parsed.filter(
               (j) =>
                 (j.Category || "").toLowerCase().trim() ===
                 category.toLowerCase().trim()
             )
-          : rows;
+          : parsed;
 
         setJobs(filtered);
-      } catch (err: any) {
-        setError(err.message || "Error loading jobs");
+      } catch (e: any) {
+        setError(e.message || "Error loading jobs");
       } finally {
         setLoading(false);
       }
-    };
-
-    loadJobs();
+    })();
   }, [category]);
 
   const categoryTitle = category
@@ -134,9 +164,7 @@ const JobListings = () => {
                         <TableHead className="font-semibold">Job Title</TableHead>
                         <TableHead className="font-semibold">Category</TableHead>
                         <TableHead className="font-semibold">Salary</TableHead>
-                        <TableHead className="font-semibold text-center">
-                          Link
-                        </TableHead>
+                        <TableHead className="font-semibold text-center">Link</TableHead>
                         <TableHead className="font-semibold">Notes</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -146,24 +174,19 @@ const JobListings = () => {
                           <TableCell className="font-medium">{job.Company}</TableCell>
                           <TableCell>{job["Job Title"]}</TableCell>
                           <TableCell>{job.Category}</TableCell>
-                          <TableCell className="whitespace-nowrap">
-                            {job.Salary}
-                          </TableCell>
+                          <TableCell className="whitespace-nowrap">{job.Salary}</TableCell>
                           <TableCell className="text-center">
                             <a
                               href={job["Job Link"]}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors"
+                              className="inline-flex items-center gap-1 text-accent hover:text-accent/80 transition-colors break-all"
                             >
                               Apply
                               <ExternalLink className="h-4 w-4" />
                             </a>
                           </TableCell>
-                          <TableCell
-                            className="max-w-xs truncate"
-                            title={job.Notes}
-                          >
+                          <TableCell className="max-w-xs truncate" title={job.Notes}>
                             {job.Notes}
                           </TableCell>
                         </TableRow>
