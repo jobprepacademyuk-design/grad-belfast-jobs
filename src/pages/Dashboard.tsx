@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Briefcase, Mail, Sparkles, TrendingUp } from "lucide-react";
+import { Briefcase, Mail, Sparkles, TrendingUp, Scale, Wrench, Code } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -21,20 +21,53 @@ const Dashboard = () => {
               <p className="mb-8 text-lg text-primary-foreground/90 md:text-xl">
                 Discover the best graduate opportunities across Finance, Law, Engineering, and Tech sectors in Belfast.
               </p>
-              <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-                <Link to="/jobs">
-                  <Button size="lg" variant="secondary" className="w-full sm:w-auto font-semibold">
-                    Browse Jobs
-                    <Briefcase className="ml-2 h-5 w-5" />
+              <div className="mx-auto max-w-md">
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="flex-1 h-12 px-4 rounded-md border border-primary-foreground/30 bg-white/10 text-primary-foreground placeholder:text-primary-foreground/60 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  />
+                  <Button size="lg" className="bg-yellow-400 text-gray-900 hover:bg-yellow-500 font-semibold px-8">
+                    Subscribe
                   </Button>
-                </Link>
-                <Link to="/pricing">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto font-semibold border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                    Premium Alerts
-                    <Sparkles className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
+                </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Job Categories Section */}
+        <section className="py-16 border-b">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-center text-3xl font-bold text-primary mb-8">
+              Browse by Sector
+            </h2>
+            <div className="mx-auto max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link to="/jobs/finance">
+                <Button variant="outline" size="lg" className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all">
+                  <Briefcase className="mr-2 h-6 w-6" />
+                  Finance
+                </Button>
+              </Link>
+              <Link to="/jobs/law">
+                <Button variant="outline" size="lg" className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all">
+                  <Scale className="mr-2 h-6 w-6" />
+                  Law
+                </Button>
+              </Link>
+              <Link to="/jobs/engineering">
+                <Button variant="outline" size="lg" className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all">
+                  <Wrench className="mr-2 h-6 w-6" />
+                  Engineering
+                </Button>
+              </Link>
+              <Link to="/jobs/tech">
+                <Button variant="outline" size="lg" className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all">
+                  <Code className="mr-2 h-6 w-6" />
+                  Tech
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
