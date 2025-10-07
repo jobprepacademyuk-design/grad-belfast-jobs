@@ -23,8 +23,15 @@ type Job = {
   Notes: string;
 };
 
-/** Minimal CSV parser that respects quotes and commas */
+// ✅ Hardcoded CSV URL (no .env needed)
+const CSV_URL =
+  "https://raw.githubusercontent.com/jobprepacademyuk-design/grad-belfast-jobs/main/public/jobs.csv";
+
+/** Robust CSV parser that respects quotes, commas, and CRLF */
 function parseCSV(text: string): Job[] {
+  // Remove BOM if present
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = "";
@@ -35,29 +42,50 @@ function parseCSV(text: string): Job[] {
     const next = text[i + 1];
 
     if (inQuotes) {
-      if (ch === '"' && next === '"') { cell += '"'; i++; }
-      else if (ch === '"') { inQuotes = false; }
-      else { cell += ch; }
+      if (ch === '"' && next === '"') {
+        cell += '"'; // escaped quote
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        cell += ch;
+      }
     } else {
-      if (ch === '"') inQuotes = true;
-      else if (ch === ",") { row.push(cell); cell = ""; }
-      else if (ch === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
-      else if (ch !== "\r") { cell += ch; }
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ",") {
+        row.push(cell);
+        cell = "";
+      } else if (ch === "\n") {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = "";
+      } else if (ch === "\r") {
+        // ignore \r (handle CRLF)
+      } else {
+        cell += ch;
+      }
     }
   }
-  if (cell.length || row.length) { row.push(cell); rows.push(row); }
+  // push last cell/row if file doesn't end with newline
+  if (cell.length || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
 
   if (!rows.length) return [];
-  const header = rows[0].map(h => h.trim());
-  const data = rows.slice(1).filter(r => r.some(c => (c || "").trim().length));
-  return data.map(r => {
+  const header = rows[0].map((h) => h.trim());
+  const dataRows = rows.slice(1).filter((r) => r.some((c) => (c ?? "").trim().length));
+
+  return dataRows.map((r) => {
     const obj: any = {};
-    header.forEach((h, i) => obj[h] = (r[i] ?? "").trim());
+    header.forEach((h, i) => (obj[h] = (r[i] ?? "").trim()));
     return obj as Job;
   });
 }
 
-const JobListings = () => {
+export default function JobListings() {
   const { category } = useParams<{ category: string }>();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,9 +97,8 @@ const JobListings = () => {
         setLoading(true);
         setError(null);
 
-        const csvUrl =
-          import.meta.env.VITE_JOBS_CSV || "/jobs.csv"; // fallback to local
-        const res = await fetch(csvUrl, { cache: "no-cache" });
+        console.log("Fetching jobs CSV from:", CSV_URL);
+        const res = await fetch(CSV_URL, { cache: "no-cache" });
         if (!res.ok) throw new Error(`Failed to load jobs (${res.status})`);
 
         const text = await res.text();
@@ -81,12 +108,13 @@ const JobListings = () => {
           ? parsed.filter(
               (j) =>
                 (j.Category || "").toLowerCase().trim() ===
-                category.toLowerCase().trim()
+                (category || "").toLowerCase().trim()
             )
           : parsed;
 
         setJobs(filtered);
       } catch (e: any) {
+        console.error(e);
         setError(e.message || "Error loading jobs");
       } finally {
         setLoading(false);
@@ -130,9 +158,7 @@ const JobListings = () => {
               </Card>
             ) : jobs.length === 0 ? (
               <Card className="p-12 text-center">
-                <p className="text-muted-foreground">
-                  No jobs found in this category.
-                </p>
+                <p className="text-muted-foreground">No jobs found in this category.</p>
               </Card>
             ) : (
               <Card className="overflow-hidden">
@@ -183,6 +209,4 @@ const JobListings = () => {
       <Footer />
     </div>
   );
-};
-
-export default JobListings;
+}
