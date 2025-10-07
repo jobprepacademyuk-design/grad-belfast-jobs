@@ -56,7 +56,7 @@ const Dashboard = () => {
                 </p>
                 <div className="mb-6">
                   <p className="text-2xl font-bold text-primary mb-2">£10.99/month</p>
-                  <p className="text-sm text-muted-foreground">Daily or weekly email alerts • Be the first to apply</p>
+                  <p className="text-sm text-muted-foreground">Daily mail alerts • Be the first to apply</p>
                 </div>
                 <Link to="/pricing">
                   <Button size="lg" className="bg-gradient-to-r from-accent to-accent/90 hover:from-accent/90 hover:to-accent font-semibold">
