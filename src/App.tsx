@@ -8,6 +8,7 @@ import FindJobs from "./pages/FindJobs";
 import JobListings from "./pages/JobListings";
 import ApplicationHelp from "./pages/ApplicationHelp";
 import CVReview from "./pages/CVReview";
+import AboutUs from "./pages/AboutUs";
 import SignIn from "./pages/SignIn";
 import Pricing from "./pages/Pricing";
 import ThankYou from "./pages/ThankYou";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/jobs/:category" element={<JobListings />} />
           <Route path="/help" element={<ApplicationHelp />} />
           <Route path="/cv-review" element={<CVReview />} />
+          <Route path="/about" element={<AboutUs />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/thanks" element={<ThankYou />} />
