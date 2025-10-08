@@ -105,6 +105,49 @@ const Dashboard = () => {
           </div>
         </section>
 
+        {/* CV Review Section */}
+        <section className="py-16 border-t">
+          <div className="container px-4 md:px-6">
+            <Card className="mx-auto max-w-4xl p-8 md:p-12 shadow-lg border-2 border-primary/20">
+              <div className="text-center">
+                <h2 className="mb-4 text-3xl font-bold text-primary">
+                  Professional CV Review Service
+                </h2>
+                <p className="mb-6 text-lg text-muted-foreground">
+                  Get expert feedback on your CV from industry professionals to maximize your chances of landing interviews.
+                </p>
+                <div className="mb-6">
+                  <p className="text-2xl font-bold text-primary mb-2">£30</p>
+                  <p className="text-sm text-muted-foreground">One-time payment • Detailed feedback within 48 hours</p>
+                </div>
+                <div className="mb-8 grid gap-4 md:grid-cols-2 text-left max-w-2xl mx-auto">
+                  <div className="flex gap-2">
+                    <span className="text-accent font-bold">✓</span>
+                    <p className="text-sm text-muted-foreground">Personalized feedback from Belfast recruiters</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-accent font-bold">✓</span>
+                    <p className="text-sm text-muted-foreground">Industry-specific advice for your sector</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-accent font-bold">✓</span>
+                    <p className="text-sm text-muted-foreground">ATS optimization to pass automated screenings</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-accent font-bold">✓</span>
+                    <p className="text-sm text-muted-foreground">Detailed report with actionable improvements</p>
+                  </div>
+                </div>
+                <Link to="/cv-review">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 font-semibold">
+                    Get Your CV Reviewed
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          </div>
+        </section>
+
         {/* Features Section */}
         <section className="py-16">
           <div className="container px-4 md:px-6">

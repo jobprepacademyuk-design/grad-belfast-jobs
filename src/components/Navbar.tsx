@@ -40,6 +40,14 @@ const Navbar = () => {
           >
             Application Help
           </Link>
+          <Link 
+            to="/cv-review" 
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              isActive("/cv-review") ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            CV Review
+          </Link>
         </div>
         
         <div className="flex items-center gap-4">
