@@ -4,6 +4,14 @@
 
 **URL**: https://lovable.dev/projects/489a78f7-3d76-4c9c-8fab-9c3294d32722
 
+## Newsletter subscription setup
+
+The dashboard newsletter form expects a POST endpoint defined in `VITE_NEWSLETTER_SUBSCRIBE_URL`.
+Set this environment variable to the URL of your email service (for example, a
+serverless function or ESP endpoint that accepts `{ "email": "user@example.com" }`).
+When the variable is not provided, submissions are stored in `localStorage` so
+the behaviour can still be demonstrated in development builds.
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
