@@ -1,15 +1,62 @@
+import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Briefcase, Mail, Sparkles, TrendingUp, Scale, Wrench, Code } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useToast } from "@/hooks/use-toast";
+import { subscribeToNewsletter } from "@/utils/newsletter";
 
 const Dashboard = () => {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubscribe = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmedEmail = email.trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!trimmedEmail || !emailPattern.test(trimmedEmail)) {
+      toast({
+        title: "Enter a valid email",
+        description: "Please provide a valid email address to join the weekly list.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const result = await subscribeToNewsletter(trimmedEmail);
+
+      toast({
+        title: "You're subscribed!",
+        description:
+          result.message ??
+          (result.storedLocally
+            ? "Your email has been saved locally while the live endpoint is configured."
+            : "Check your inbox for a confirmation email."),
+      });
+      setEmail("");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Something went wrong.";
+      toast({
+        title: "Subscription failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      
+
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/90 py-20 md:py-32">
@@ -22,16 +69,25 @@ const Dashboard = () => {
                 Discover the best graduate opportunities across Finance, Law, Engineering, and Tech sectors in Belfast.
               </p>
               <div className="mx-auto max-w-md">
-                <div className="flex gap-2">
+                <form onSubmit={handleSubscribe} className="flex gap-2">
                   <input
                     type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
                     placeholder="Enter your email"
                     className="flex-1 h-12 px-4 rounded-md border border-primary-foreground/30 bg-white/10 text-primary-foreground placeholder:text-primary-foreground/60 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    aria-label="Email address"
+                    disabled={isSubmitting}
                   />
-                  <Button size="lg" className="bg-yellow-400 text-gray-900 hover:bg-yellow-500 font-semibold px-8">
-                    Subscribe
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="bg-yellow-400 text-gray-900 hover:bg-yellow-500 font-semibold px-8"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Subscribing..." : "Subscribe"}
                   </Button>
-                </div>
+                </form>
               </div>
             </div>
           </div>
