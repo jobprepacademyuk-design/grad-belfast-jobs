@@ -1,58 +1,11 @@
-import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Briefcase, Mail, Sparkles, TrendingUp, Scale, Wrench, Code } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useToast } from "@/hooks/use-toast";
-import { subscribeToNewsletter } from "@/utils/newsletter";
 
 const Dashboard = () => {
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-
-  const handleSubscribe = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const trimmedEmail = email.trim();
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!trimmedEmail || !emailPattern.test(trimmedEmail)) {
-      toast({
-        title: "Enter a valid email",
-        description: "Please provide a valid email address to join the weekly list.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const result = await subscribeToNewsletter(trimmedEmail);
-
-      toast({
-        title: "You're subscribed!",
-        description:
-          result.message ??
-          (result.storedLocally
-            ? "Your email has been saved locally while the live endpoint is configured."
-            : "Check your inbox for a confirmation email."),
-      });
-      setEmail("");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Something went wrong.";
-      toast({
-        title: "Subscription failed",
-        description: message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -68,25 +21,34 @@ const Dashboard = () => {
               <p className="mb-8 text-lg text-primary-foreground/90 md:text-xl">
                 Discover the best graduate opportunities across Finance, Law, Engineering, and Tech sectors in Belfast.
               </p>
+
+              {/* Subscribe form → posts directly to Brevo */}
               <div className="mx-auto max-w-md">
-                <form onSubmit={handleSubscribe} className="flex gap-2">
+                <form
+                  action="https://6aaff317.sibforms.com/serve/MUIFAHjStqUgvgoN5PmXGaNj0Nl6KoNPbAFAIMMzk4olB3tox75gHMl_6KV97BsQwJo-dlPVbu4YPqv1I0ZU3VzAx8oi0j55K-t0b0dwrmD5Y0_Phe0fG6vkJrlRLuiNtHxX-jFPIffki-iMie_Vn07CdUTYD4ZKtz9YoHtB-v77DxQSR76Nyp5lWDDBIncZwFAJs8-vyorkhb9eOg=="
+                  method="POST"
+                  data-type="subscription"
+                  className="flex gap-2"
+                >
                   <input
                     type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
+                    name="EMAIL" /* required by Brevo */
                     placeholder="Enter your email"
-                    className="flex-1 h-12 px-4 rounded-md border border-primary-foreground/30 bg-white/10 text-primary-foreground placeholder:text-primary-foreground/60 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    autoComplete="email"
+                    required
                     aria-label="Email address"
-                    disabled={isSubmitting}
+                    className="flex-1 h-12 px-4 rounded-md border border-primary-foreground/30 bg-white/10 text-primary-foreground placeholder:text-primary-foreground/60 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
-                  <Button
+                  <button
                     type="submit"
-                    size="lg"
-                    className="bg-yellow-400 text-gray-900 hover:bg-yellow-500 font-semibold px-8"
-                    disabled={isSubmitting}
+                    className="h-12 rounded-md bg-yellow-400 px-8 font-semibold text-gray-900 hover:bg-yellow-500"
                   >
-                    {isSubmitting ? "Subscribing..." : "Subscribe"}
-                  </Button>
+                    Subscribe
+                  </button>
+
+                  {/* Brevo required hidden fields */}
+                  <input type="text" name="email_address_check" value="" className="hidden" readOnly />
+                  <input type="hidden" name="locale" value="en" />
                 </form>
               </div>
             </div>
@@ -101,25 +63,41 @@ const Dashboard = () => {
             </h2>
             <div className="mx-auto max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link to="/jobs/finance">
-                <Button variant="outline" size="lg" className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
+                >
                   <Briefcase className="mr-2 h-6 w-6" />
                   Finance
                 </Button>
               </Link>
               <Link to="/jobs/law">
-                <Button variant="outline" size="lg" className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
+                >
                   <Scale className="mr-2 h-6 w-6" />
                   Law
                 </Button>
               </Link>
               <Link to="/jobs/engineering">
-                <Button variant="outline" size="lg" className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
+                >
                   <Wrench className="mr-2 h-6 w-6" />
                   Engineering
                 </Button>
               </Link>
               <Link to="/jobs/tech">
-                <Button variant="outline" size="lg" className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-24 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-all"
+                >
                   <Code className="mr-2 h-6 w-6" />
                   Tech
                 </Button>
@@ -216,33 +194,27 @@ const Dashboard = () => {
                   <div className="mb-4 inline-flex items-center justify-center rounded-lg bg-accent/10 p-3">
                     <Briefcase className="h-6 w-6 text-accent" />
                   </div>
-                  <h3 className="mb-2 text-xl font-semibold text-primary">
-                    Curated Opportunities
-                  </h3>
+                  <h3 className="mb-2 text-xl font-semibold text-primary">Curated Opportunities</h3>
                   <p className="text-muted-foreground">
                     Hand-picked graduate roles from Belfast's top employers across key sectors.
                   </p>
                 </Card>
-                
+
                 <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="mb-4 inline-flex items-center justify-center rounded-lg bg-accent/10 p-3">
                     <Mail className="h-6 w-6 text-accent" />
                   </div>
-                  <h3 className="mb-2 text-xl font-semibold text-primary">
-                    Daily Updates
-                  </h3>
+                  <h3 className="mb-2 text-xl font-semibold text-primary">Daily Updates</h3>
                   <p className="text-muted-foreground">
                     Stay ahead with premium email alerts delivered every morning at 7:30am.
                   </p>
                 </Card>
-                
+
                 <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="mb-4 inline-flex items-center justify-center rounded-lg bg-accent/10 p-3">
                     <TrendingUp className="h-6 w-6 text-accent" />
                   </div>
-                  <h3 className="mb-2 text-xl font-semibold text-primary">
-                    Career Support
-                  </h3>
+                  <h3 className="mb-2 text-xl font-semibold text-primary">Career Support</h3>
                   <p className="text-muted-foreground">
                     Access expert guidance on CVs, interviews, and assessment tests.
                   </p>
@@ -252,7 +224,7 @@ const Dashboard = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );
