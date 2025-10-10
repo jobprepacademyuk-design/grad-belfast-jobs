@@ -15,6 +15,9 @@ import ThankYou from "./pages/ThankYou";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/auth";
 import AccountPage from "./pages/account";
+import AccountPage from "./pages/Account";
+// ...
+<Route path="/account" element={<AccountPage />} />
 
 const queryClient = new QueryClient();
 
