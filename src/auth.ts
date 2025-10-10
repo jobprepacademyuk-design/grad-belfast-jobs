@@ -1,13 +1,10 @@
-import { supabase } from '@/integrations/supabase/client';
+// src/auth.ts
+import { supabase } from "@/lib/supabase";
 
-export async function signUpWithEmail(email: string, password: string, name?: string) {
+export async function signUpWithEmail(email: string, password: string, _name?: string) {
+  // Create auth user only (skip profiles update for now)
   const { data, error } = await supabase.auth.signUp({ email, password });
   if (error) throw error;
-
-  // optional: set display name
-  if (name && data.user) {
-    await supabase.from('profiles').update({ name }).eq('id', data.user.id);
-  }
   return data.user;
 }
 
