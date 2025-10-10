@@ -23,8 +23,11 @@ export default function SignIn() {
         const user = data.user;
         // If email confirmations are ON, user may be null until they confirm
         if (user) {
-          // save name in profiles
-          await supabase.from("profiles").update({ name }).eq("id", user.id);
+          // Ensure the profile row exists for the authenticated user
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .upsert({ id: user.id, name }, { onConflict: "id" });
+          if (profileError) throw profileError;
           nav("/account");
         } else {
           alert("Check your inbox to confirm your email, then sign in.");
