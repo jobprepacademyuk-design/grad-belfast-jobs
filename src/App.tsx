@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Dashboard from "./pages/Dashboard";
 import FindJobs from "./pages/FindJobs";
 import JobListings from "./pages/JobListings";
@@ -13,11 +14,7 @@ import SignIn from "./pages/SignIn";
 import Pricing from "./pages/Pricing";
 import ThankYou from "./pages/ThankYou";
 import NotFound from "./pages/NotFound";
-import AuthPage from "./pages/auth";
-import AccountPage from "./pages/account";
-import AccountPage from "./pages/Account";
-// ...
-<Route path="/account" element={<AccountPage />} />
+import AccountPage from "./pages/Account"; // <-- keep this one; ensure the file is named Account.tsx
 
 const queryClient = new QueryClient();
 
@@ -37,7 +34,6 @@ const App = () => (
           <Route path="/signin" element={<SignIn />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/thanks" element={<ThankYou />} />
-          <Route path="/auth" element={<AuthPage />} />
           <Route path="/account" element={<AccountPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
