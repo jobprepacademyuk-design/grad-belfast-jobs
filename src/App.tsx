@@ -14,7 +14,7 @@ import SignIn from "./pages/SignIn";
 import Pricing from "./pages/Pricing";
 import ThankYou from "./pages/ThankYou";
 import NotFound from "./pages/NotFound";
-import AccountPage from "./pages/Account"; // <-- keep this one; ensure the file is named Account.tsx
+import AccountPage from "./pages/account"; // ✅ lowercase import
 
 const queryClient = new QueryClient();
 
@@ -34,7 +34,7 @@ const App = () => (
           <Route path="/signin" element={<SignIn />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/thanks" element={<ThankYou />} />
-          <Route path="/account" element={<AccountPage />} />
+          <Route path="/account" element={<AccountPage />} /> {/* ✅ Route added */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
