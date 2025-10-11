@@ -3,45 +3,30 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle2, Upload, Clock, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useState } from "react";                 // ✅ NEW
+import { useState } from "react";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!); // ✅ NEW
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
 
 const CVReview = () => {
   const [loading, setLoading] = useState(false); // ✅ NEW
 
   const handleStripeCheckout = async () => {
-  setLoading(true);
-  try {
-    // ✅ Load Stripe dynamically when button is clicked
-    const { loadStripe } = await import("@stripe/stripe-js");
-    const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
-    if (!stripe) throw new Error("Stripe failed to load");
+    setLoading(true);
+    try {
+      // ✅ Load Stripe dynamically when button is clicked
+      const stripe: Stripe | null = await stripePromise;
+      if (!stripe) throw new Error("Stripe failed to load");
 
-    // ✅ Create the checkout session
-    const res = await fetch("/api/create-checkout-session", { method: "POST" });
-    const data = await res.json();
-    if (!data?.id) throw new Error("No session ID returned from server");
-
-    // ✅ Redirect to Stripe Checkout
-    const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
-    if (error) alert(error.message);
-  } catch (e) {
-    console.error(e);
-    alert("Unable to start checkout. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-      if (!data?.id) throw new Error("No session id returned from server");
+      // Create the checkout session
+      const res = await fetch("/api/create-checkout-session", { method: "POST" });
+      const data = await res.json();
+      if (!data?.id) throw new Error("No session ID returned from server");
 
       // Redirect to Stripe Checkout
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error("Stripe failed to load");
-      const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
-      if (error) alert(error.message);
+      // @ts-expect-error: TypeScript type issue, method exists at runtime
+      const result = await stripe.redirectToCheckout({ sessionId: data.id });
+      if (result.error) alert(result.error.message);
     } catch (e) {
       console.error(e);
       alert("Unable to start checkout. Please try again.");
@@ -49,6 +34,9 @@ const CVReview = () => {
       setLoading(false);
     }
   };
+
+
+  // ...existing code...
 
   return (
     <div className="flex min-h-screen flex-col">

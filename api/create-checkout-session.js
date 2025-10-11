@@ -1,7 +1,6 @@
-// api/create-checkout-session.js
-import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // use your *restricted* key
+import Stripe from "stripe";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -9,22 +8,26 @@ export default async function handler(req, res) {
   }
 
   try {
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [
         {
           price_data: {
             currency: "gbp",
-            product: "prod_TDIKoy10UlXRu6", // your CV Review product
-            unit_amount: 3000,              // £30 in pence
+            product_data: {
+              name: "CV Review Service",
+              description: "Professional CV review by Belfast industry experts",
+            },
+            unit_amount: 3000, // £30 in pence
           },
           quantity: 1,
         },
       ],
       customer_creation: "always",
       billing_address_collection: "required",
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cv-review`,
+      success_url: `https://grad-belfast-jobs.lovable.app/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://grad-belfast-jobs.lovable.app/cv-review`,
       metadata: { product: "cv_review" },
     });
 
