@@ -11,11 +11,29 @@ const CVReview = () => {
   const [loading, setLoading] = useState(false); // ✅ NEW
 
   const handleStripeCheckout = async () => {
-    setLoading(true);
-    try {
-      // Call your serverless function to create the Checkout Session
-      const res = await fetch("/api/create-checkout-session", { method: "POST" });
-      const data = await res.json();
+  setLoading(true);
+  try {
+    // ✅ Load Stripe dynamically when button is clicked
+    const { loadStripe } = await import("@stripe/stripe-js");
+    const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
+    if (!stripe) throw new Error("Stripe failed to load");
+
+    // ✅ Create the checkout session
+    const res = await fetch("/api/create-checkout-session", { method: "POST" });
+    const data = await res.json();
+    if (!data?.id) throw new Error("No session ID returned from server");
+
+    // ✅ Redirect to Stripe Checkout
+    const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
+    if (error) alert(error.message);
+  } catch (e) {
+    console.error(e);
+    alert("Unable to start checkout. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
       if (!data?.id) throw new Error("No session id returned from server");
 
