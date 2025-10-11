@@ -3,11 +3,34 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle2, Upload, Clock, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { loadStripe } from "@stripe/stripe-js";   // ✅ NEW
+import { useState } from "react";                 // ✅ NEW
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!); // ✅ NEW
 
 const CVReview = () => {
-  const handleStripeCheckout = () => {
-    // TODO: Integrate Stripe Checkout
-    console.log("Stripe checkout integration pending");
+  const [loading, setLoading] = useState(false); // ✅ NEW
+
+  const handleStripeCheckout = async () => {
+    setLoading(true);
+    try {
+      // Call your serverless function to create the Checkout Session
+      const res = await fetch("/api/create-checkout-session", { method: "POST" });
+      const data = await res.json();
+
+      if (!data?.id) throw new Error("No session id returned from server");
+
+      // Redirect to Stripe Checkout
+      const stripe = await stripePromise;
+      if (!stripe) throw new Error("Stripe failed to load");
+      const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
+      if (error) alert(error.message);
+    } catch (e) {
+      console.error(e);
+      alert("Unable to start checkout. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -154,9 +177,10 @@ const CVReview = () => {
               <Button 
                 size="lg" 
                 onClick={handleStripeCheckout}
-                className="bg-yellow-400 text-gray-900 hover:bg-yellow-500 font-semibold px-12"
+                disabled={loading}
+                className="bg-yellow-400 text-gray-900 hover:bg-yellow-500 font-semibold px-12 disabled:opacity-60"
               >
-                Purchase CV Review
+                {loading ? "Redirecting..." : "Purchase CV Review"}
               </Button>
               <p className="mt-4 text-xs text-muted-foreground">
                 Secure payment powered by Stripe
