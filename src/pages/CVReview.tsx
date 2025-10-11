@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle2, Upload, Clock, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { loadStripe } from "@stripe/stripe-js";   // ✅ NEW
 import { useState } from "react";                 // ✅ NEW
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!); // ✅ NEW
