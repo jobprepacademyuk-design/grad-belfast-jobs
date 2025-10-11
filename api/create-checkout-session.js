@@ -1,10 +1,11 @@
-import Stripe from "stripe";
-
+// Serverless function for Vercel/Netlify-style hosts
+const Stripe = require("stripe");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    res.status(405).json({ error: "Method not allowed" });
+    return;
   }
 
   try {
@@ -14,8 +15,8 @@ export default async function handler(req, res) {
         {
           price_data: {
             currency: "gbp",
-            product: "prod_TDIKoy10UlXRu6", // your Stripe product ID
-            unit_amount: 3000, // £30.00 in pence
+            product: "prod_TDIKoy10UlXRu6", // your product
+            unit_amount: 3000,              // £30 in pence
           },
           quantity: 1,
         },
@@ -32,4 +33,4 @@ export default async function handler(req, res) {
     console.error(err);
     res.status(500).json({ error: "Unable to create session" });
   }
-}
+};
