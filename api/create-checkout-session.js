@@ -1,11 +1,11 @@
-// Serverless function for Vercel/Netlify-style hosts
-const Stripe = require("stripe");
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// api/create-checkout-session.js
+import Stripe from "stripe";
 
-module.exports = async (req, res) => {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // use your *restricted* key
+
+export default async function handler(req, res) {
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
         {
           price_data: {
             currency: "gbp",
-            product: "prod_TDIKoy10UlXRu6", // your product
+            product: "prod_TDIKoy10UlXRu6", // your CV Review product
             unit_amount: 3000,              // £30 in pence
           },
           quantity: 1,
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
 
     res.status(200).json({ id: session.id });
   } catch (err) {
-    console.error(err);
+    console.error("Stripe error:", err);
     res.status(500).json({ error: "Unable to create session" });
   }
-};
+}
