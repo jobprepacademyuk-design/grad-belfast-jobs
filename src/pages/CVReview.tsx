@@ -14,19 +14,13 @@ const CVReview = () => {
   const handleStripeCheckout = async () => {
     setLoading(true);
     try {
-      // ✅ Load Stripe dynamically when button is clicked
-      const stripe: Stripe | null = await stripePromise;
-      if (!stripe) throw new Error("Stripe failed to load");
-
       // Create the checkout session
       const res = await fetch("/api/create-checkout-session", { method: "POST" });
       const data = await res.json();
-      if (!data?.id) throw new Error("No session ID returned from server");
+      if (!data?.url) throw new Error("No session URL returned from server");
 
-      // Redirect to Stripe Checkout
-      // @ts-expect-error: TypeScript type issue, method exists at runtime
-      const result = await stripe.redirectToCheckout({ sessionId: data.id });
-      if (result.error) alert(result.error.message);
+      // Redirect to Stripe Checkout using session URL
+      window.location.href = data.url;
     } catch (e) {
       console.error(e);
       alert("Unable to start checkout. Please try again.");
