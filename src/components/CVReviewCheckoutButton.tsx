@@ -9,15 +9,10 @@ export default function CVReviewCheckoutButton({ label = "Purchase CV Review" })
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/create-checkout-session", { method: "POST" });
-      const data = await res.json();
-      if (!data?.id) throw new Error("No session id from server");
-
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error("Stripe failed to load");
-
-      const { error } = await stripe.redirectToCheckout({ sessionId: data.id });
-      if (error) alert(error.message);
+  const res = await fetch("/api/create-checkout-session", { method: "POST" });
+  const data = await res.json();
+  if (!data?.url) throw new Error("No session url from server");
+  window.location.href = data.url;
     } catch (e: any) {
       console.error(e);
       alert("Could not start checkout. Please try again.");
