@@ -5,9 +5,25 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const Pricing = () => {
-  const handleSubscribe = () => {
-    // Placeholder for Stripe Checkout integration
-    console.log("Redirecting to Stripe Checkout...");
+  const handleSubscribe = async () => {
+    try {
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product: "premium_daily" }),
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Unable to start Stripe checkout. Please try again.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Unable to start Stripe checkout. Please try again.");
+    }
   };
 
   return (
